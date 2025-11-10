@@ -109,3 +109,11 @@ td button:last-child {
 td button:last-child:hover {
   background-color: #c0392b;
 }
+
+/* src/index.css (adicionado: estilos para o botão de exclusão) */
+td button.delete-button {
+  background-color: #e74c3c;
+}
+td button.delete-button:hover {
+  background-color: #c0392b;
+}

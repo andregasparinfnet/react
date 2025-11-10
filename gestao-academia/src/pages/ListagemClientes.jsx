@@ -1,29 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import api from '../services/api';
-import ClienteTabela from '../components/ClienteTabela'; // 1. Importe o componente novo
+import React from 'react';
+import ClienteTabela from '../components/ClienteTabela';
 
-// (Feature 1: Usando arrow function)
-const ListagemClientes = () => {
-  const [clientes, setClientes] = useState([]);
-
-  const fetchClientes = async () => {
-    try {
-      const response = await api.get('/clientes');
-      setClientes(response.data);
-    } catch (error) {
-      console.error("Erro ao buscar clientes:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchClientes();
-  }, []);
-
+// 1. Receba { clientes } como prop
+const ListagemClientes = ({ clientes, onDelete }) => {
+  // Toda a lógica de useState e useEffect foi REMOVIDA
+  
   return (
     <div>
       <h2>Clientes Cadastrados</h2>
-      {/* 2. Use o componente e passe os dados via props */}
-      <ClienteTabela clientes={clientes} />
+      {/* 2. Passe a prop 'clientes' para a tabela */}
+      <ClienteTabela clientes={clientes} onDelete={onDelete} />
     </div>
   );
 }

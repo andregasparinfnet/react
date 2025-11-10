@@ -2,8 +2,8 @@ import React from 'react';
 
 // (Feature 1: Componente reutilizável)
 // (Feature 1: Usando arrow function para definir o componente)
-// (Feature 1: Usando destructuring nas props para pegar { clientes })
-const ClienteTabela = ({ clientes }) => {
+// (Feature 1: Usando destructuring nas props para pegar { clientes, onDelete })
+const ClienteTabela = ({ clientes, onDelete }) => {
 
   // (Feature 1: JSX para renderizar os dados)
   return (
@@ -26,7 +26,10 @@ const ClienteTabela = ({ clientes }) => {
             <td>
               {/* (Feature 1: Botões de ação reutilizáveis) */}
               <button>Editar</button>
-              <button>Excluir</button>
+              <button 
+                onClick={() => onDelete && onDelete(cliente.id)}
+                className="delete-button"
+              >Excluir</button>
             </td>
           </tr>
         ))}
