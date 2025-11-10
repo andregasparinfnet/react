@@ -1,9 +1,19 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
-import { Container } from '@mui/material'; // 1. Importe o Container
+import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { Container, Button } from '@mui/material'; // 1. Importe Button
+import { useAuth } from '../context/AuthContext'; // 1. Importe useAuth
 
 // (Feature 3: Componente de Layout com navegação)
 const Layout = () => {
+  // 2. Puxe o estado e a função de logout
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate(); // Para o logout e navegação
+
+  const handleLogout = () => {
+    logout();
+    navigate('/'); // Redireciona para a Home após o logout
+  };
+
   return (
     <div>
       {/* 1. Cabeçalho e Título Principal (movido do App.jsx) */}
@@ -14,9 +24,30 @@ const Layout = () => {
         <nav>
           {/* 'Link' é o '<a>' do React Router */}
           <Link to="/">Home</Link>
-          <Link to="/clientes">Gerenciar Clientes</Link>
-          <Link to="/instrutores">Nossos Instrutores</Link>
+
+          {/* 3. (Feature 3: Renderização Condicional da Navegação) */}
+          {isAuthenticated && (
+            <>
+              <Link to="/clientes">Gerenciar Clientes</Link>
+              <Link to="/instrutores">Nossos Instrutores</Link>
+            </>
+          )}
         </nav>
+
+        {/* 4. (Feature 3: Renderização Condicional Login/Logout) */}
+        {isAuthenticated ? (
+          <Button color="inherit" onClick={handleLogout} variant="outlined">
+            Logout
+          </Button>
+        ) : (
+          <Button 
+            color="inherit" 
+            onClick={() => navigate('/login')} 
+            variant="outlined"
+          >
+            Login
+          </Button>
+        )}
       </header>
 
       <hr />
