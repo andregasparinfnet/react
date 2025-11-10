@@ -4,6 +4,7 @@ import FormularioCliente from './components/FormularioCliente';
 
 // 2. Importamos nosso Hook de contexto
 import { useClientes } from './context/ClienteContext';
+import { Box, Divider } from '@mui/material'; // 1. Imports do MUI
 import './App.css'
 
 // (Componente de Mensagem continua o mesmo, se você o manteve aqui)
@@ -16,25 +17,20 @@ const Mensagem = ({ tipo, texto }) => {
 
 
 function App() {
-  // 3. Pegamos APENAS o que o App precisa do contexto
   const { mensagem } = useClientes();
 
-  // 4. TODA a lógica de handleSave, handleDelete, etc. SUMIU!
-
   return (
-    // 1. O Título <h1> e o <hr> foram REMOVIDOS daqui
-    // O Layout.jsx agora cuida disso.
-    <div>
+    // 2. Use Box no lugar de <div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}> 
       <Mensagem tipo={mensagem.tipo} texto={mensagem.texto} />
-
-      {/* 2. O <hr> foi removido daqui também */}
 
       <FormularioCliente />
 
-      <hr /> 
+      {/* 3. Use Divider no lugar de <hr /> */}
+      <Divider sx={{ marginY: 2 }} /> 
 
       <ListagemClientes />
-    </div>
+    </Box>
   )
 }
 

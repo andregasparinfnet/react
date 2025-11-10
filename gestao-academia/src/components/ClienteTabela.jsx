@@ -1,49 +1,60 @@
 import React from 'react';
-// 1. Importe o hook
 import { useClientes } from '../context/ClienteContext';
 
-// 2. Remova 'onDelete' e 'onEdit' das props
-const ClienteTabela = ({ clientes }) => {
+// 1. Imports dos componentes do MUI
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton
+} from '@mui/material';
 
-  // 3. Puxe as funções do contexto
+// 2. Imports dos Ícones do MUI
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+
+const ClienteTabela = ({ clientes }) => {
+  // 3. Lógica do contexto (sem mudança)
   const { handleEdit, handleDelete } = useClientes();
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Plano</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {clientes.map(cliente => (
-          <tr key={cliente.id}>
-            <td>{cliente.nome}</td>
-            <td>{cliente.plano}</td>
-            <td>{cliente.status}</td>
-            <td>
-              {/* 4. Use as funções do contexto */}
-              <button 
-                onClick={() => handleEdit(cliente)} 
-                className="edit-button"
-              >
-                Editar
-              </button>
-
-              <button 
-                onClick={() => handleDelete(cliente.id)}
-                className="delete-button"
-              >
-                Excluir
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    // 4. Componente de "container" que dá o fundo de papel
+    <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }}>
+        <TableHead>
+          <TableRow>
+            {/* Células do Cabeçalho (negrito por padrão) */}
+            <TableCell>Nome</TableCell>
+            <TableCell>Plano</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell align="right">Ações</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {clientes.map(cliente => (
+            <TableRow key={cliente.id}>
+              {/* Células do Corpo */}
+              <TableCell>{cliente.nome}</TableCell>
+              <TableCell>{cliente.plano}</TableCell>
+              <TableCell>{cliente.status}</TableCell>
+              <TableCell align="right">
+                {/* 5. (Feature 3: Componente de Terceiro - IconButton) */}
+                <IconButton onClick={() => handleEdit(cliente)} color="primary">
+                  <EditIcon />
+                </IconButton>
+                <IconButton onClick={() => handleDelete(cliente.id)} color="error">
+                  <DeleteIcon />
+                </IconButton>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

@@ -1,77 +1,104 @@
 import React from 'react';
-// 2. Importamos nosso novo Hook
 import { useClienteForm } from '../hooks/useClienteForm';
-// 1. Importe o hook de contexto
 import { useClientes } from '../context/ClienteContext';
 
-// 2. Remova as props onSave, clienteEmEdicao, onCancel
+// 1. Imports dos componentes de formulário do MUI
+import {
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Box,
+  Typography
+} from '@mui/material';
+
 const FormularioCliente = () => {
-
-  // 3. Puxe os dados do contexto
-  const { 
-    handleSave,       // Renomeamos onSave para handleSave no contexto
-    clienteEmEdicao, 
-    handleCancelEdit  // Renomeamos onCancel para handleCancelEdit
-  } = useClientes();
-
-  // O hook do formulário funciona perfeitamente
-  const { 
-    nome, setNome, 
-    plano, setPlano, 
-    status, setStatus 
-  } = useClienteForm(clienteEmEdicao);
+  const { handleSave, clienteEmEdicao, handleCancelEdit } = useClientes();
+  const { nome, setNome, plano, setPlano, status, setStatus } = useClienteForm(clienteEmEdicao);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!nome) {
-      alert("O nome é obrigatório!");
+      alert("O nome é obrigatório!"); // (Validação simples mantida)
       return;
     }
-    // 4. Use a função do contexto
     await handleSave({ nome, plano, status }); 
   };
 
-  // O JSX (return) abaixo usa as funções do contexto
   return (
-    <form onSubmit={handleSubmit}>
-      {/* ... (o h3 não muda) ... */}
-      <h3>
+    // 2. (Feature 3: Componente de Terceiro - Box)
+    // Box é uma "div" do MUI, usamos 'component="form"' para ele funcionar como formulário
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2, // Espaçamento entre os campos
+        padding: 2,
+        border: '1px solid #e0e0e0',
+        borderRadius: '8px',
+        backgroundColor: '#fff'
+      }}
+    >
+      {/* 3. Trocamos o 'h3' por 'Typography' (componente de texto do MUI) */}
+      <Typography variant="h5" component="h3">
         {clienteEmEdicao ? `Editando: ${clienteEmEdicao.nome}` : 'Cadastrar Novo Cliente'}
-      </h3>
-      {/* ... (os inputs não mudam) ... */}
+      </Typography>
+      
+      {/* 4. (Feature 3: Componente de Terceiro - TextField) */}
+      <TextField
+        label="Nome"
+        variant="outlined"
+        fullWidth
+        value={nome}
+        onChange={(e) => setNome(e.target.value)}
+        required
+      />
+      
+      {/* 5. (Feature 3: Componente de Terceiro - Select) */}
+      <FormControl fullWidth>
+        <InputLabel id="plano-label">Plano</InputLabel>
+        <Select
+          labelId="plano-label"
+          label="Plano"
+          value={plano}
+          onChange={(e) => setPlano(e.target.value)}
+        >
+          <MenuItem value="Musculação">Musculação</MenuItem>
+          <MenuItem value="Pilates">Pilates</MenuItem>
+          <MenuItem value="Completo">Completo</MenuItem>
+        </Select>
+      </FormControl>
 
-      <div>
-        <label htmlFor="nome">Nome:</label>
-        <input type="text" id="nome" value={nome} onChange={(e) => setNome(e.target.value)} />
-      </div>
-      <div>
-        <label htmlFor="plano">Plano:</label>
-        <select id="plano" value={plano} onChange={(e) => setPlano(e.target.value)}>
-          <option value="Musculação">Musculação</option>
-          <option value="Pilates">Pilates</option>
-          <option value="Completo">Completo</option>
-        </select>
-      </div>
-      <div>
-        <label htmlFor="status">Status:</label>
-        <select id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="Ativo">Ativo</option>
-          <option value="Inativo">Inativo</option>
-        </select>
-      </div>
-
-      <div className="form-buttons">
-        <button type="submit">
+      <FormControl fullWidth>
+        <InputLabel id="status-label">Status</InputLabel>
+        <Select
+          labelId="status-label"
+          label="Status"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <MenuItem value="Ativo">Ativo</MenuItem>
+          <MenuItem value="Inativo">Inativo</MenuItem>
+        </Select>
+      </FormControl>
+      
+      {/* 6. (Feature 3: Componente de Terceiro - Button) */}
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <Button type="submit" variant="contained" color="primary">
           {clienteEmEdicao ? 'Atualizar' : 'Salvar'}
-        </button>
-
+        </Button>
+        
         {clienteEmEdicao && (
-          <button type="button" onClick={handleCancelEdit} className="cancel-button">
+          <Button variant="outlined" color="secondary" onClick={handleCancelEdit}>
             Cancelar
-          </button>
+          </Button>
         )}
-      </div>
-    </form>
+      </Box>
+    </Box>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
+import { Container } from '@mui/material'; // 1. Importe o Container
 
 // (Feature 3: Componente de Layout com navegação)
 const Layout = () => {
@@ -20,11 +21,11 @@ const Layout = () => {
 
       <hr />
 
-      {/* 3. Área de Conteúdo da Página */}
+      {/* 2. Envolva o Outlet com o Container */}
       <main>
-        {/* 'Outlet' renderiza o componente da rota atual */}
-        {/* (Ex: HomePage ou App) */}
-        <Outlet />
+        <Container maxWidth="lg" sx={{ marginTop: 4 }}>
+          <Outlet />
+        </Container>
       </main>
     </div>
   );
