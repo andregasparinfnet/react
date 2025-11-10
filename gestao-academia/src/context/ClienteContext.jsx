@@ -13,19 +13,51 @@ export const ClienteProvider = ({ children }) => {
   const [clientes, setClientes] = useState([]);
   const [clienteEmEdicao, setClienteEmEdicao] = useState(null);
   const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
+  // 1. NOVO ESTADO: Para a barra de busca
+  const [searchTerm, setSearchTerm] = useState('');
 
+  // 2. useEffect MODIFICADO: Agora busca os clientes E reage à busca
+  // (Feature 3: AbortController para tratar race conditions)
   useEffect(() => {
+    // --- Início da lógica do AbortController ---
+
+    // 1. Cria um novo "controlador" para esta requisição específica
+    const controller = new AbortController();
+
     const fetchClientes = async () => {
       try {
-        const response = await api.get('/clientes');
+        // 2. Passamos o 'signal' do controlador para o axios.
+        // O 'json-server' usa o parâmetro 'q' para busca full-text
+        const response = await api.get(`/clientes?q=${encodeURIComponent(searchTerm)}`, {
+          signal: controller.signal // <--- O AbortController é conectado aqui
+        });
+
         setClientes(response.data);
+
       } catch (error) {
-        console.error("Erro ao buscar clientes:", error);
-        mostrarMensagem('error', 'Falha ao carregar clientes.');
+        // 3. Se o erro for de cancelamento (proposital), não fazemos nada
+        if (error && (error.name === 'CanceledError' || error.code === 'ERR_CANCELED')) {
+          console.log('Requisição anterior cancelada');
+        } else {
+          // Se for um erro real (rede, 500, etc.)
+          console.error("Erro ao buscar clientes:", error);
+          mostrarMensagem('error', 'Falha ao carregar clientes.');
+        }
       }
     };
+
     fetchClientes();
-  }, []);
+
+    // 4. A MÁGICA: A função de "limpeza" do useEffect
+    // Isso roda ANTES da próxima execução do useEffect ou quando o componente "morre".
+    return () => {
+      // 5. Cancela a requisição ANTERIOR
+      // console.log(`Cancelando requisição para: ${searchTerm}`);
+      controller.abort(); 
+    };
+    // --- Fim da lógica do AbortController ---
+
+  }, [searchTerm]); // 6. O Array de dependência: Rode de novo se 'searchTerm' mudar
 
   const mostrarMensagem = (tipo, texto) => {
     setMensagem({ tipo, texto });
@@ -83,6 +115,8 @@ export const ClienteProvider = ({ children }) => {
       clientes,
       clienteEmEdicao,
       mensagem,
+      searchTerm,
+      setSearchTerm,
       handleSave,
       handleEdit,
       handleCancelEdit,

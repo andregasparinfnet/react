@@ -1,39 +1,65 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios'; // Vamos usar axios para a requisição
+import axios from 'axios';
 
-// 1. (Feature 3: Integrar API real - GitHub)
-// Esta é a função que busca os dados.
-const fetchInstrutores = async () => {
-  // Usamos axios.get() direto, pois nosso 'api.js' está configurado para o localhost.
-  const { data } = await axios.get('https://api.github.com/orgs/reactjs/members');
-  return data;
+// 1. (Feature 3: Promise.race - Helper de Timeout)
+// Esta função cria uma promise que falha (rejeita) após um tempo
+const timeoutPromise = (ms, message = 'A requisição estourou o tempo limite') => {
+  return new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error(message));
+    }, ms);
+  });
+};
+
+
+// 2. (Feature 3: Integrar API real - GitHub)
+// A função de busca agora é MAIS ROBUSTA
+const fetchInstrutores = async ({ signal }) => { // 'signal' é passado pelo useQuery
+  try {
+    // 3. (Feature 3: Promise.race)
+    // Começa a "corrida" entre a requisição e um timeout de 5 segundos
+    const response = await Promise.race([
+      // Promise 1: A requisição real (passando o 'signal' do useQuery)
+      axios.get('https://api.github.com/orgs/reactjs/members', {
+        signal: signal 
+      }),
+      // Promise 2: Nosso timer
+      timeoutPromise(5000, 'A API do GitHub demorou mais de 5 segundos para responder.')
+    ]);
+
+    // Se chegamos aqui, o axios "ganhou" a corrida
+    return response.data;
+
+  } catch (error) {
+    // Se o timeout "ganhou" ou o axios falhou, o erro é pego aqui
+    // e repassado para o useQuery
+    throw error;
+  }
 };
 
 const InstrutoresPage = () => {
-
-  // 2. (Feature 3: Utilizando React Query para gerenciar cache)
-  // O useQuery cuida de tudo: loading, error, cache, e re-validação.
   const { 
-    data: instrutores, // 'data' é renomeado para 'instrutores'
-    isLoading,         // Estado de carregamento
-    isError,           // Estado de erro
-    error              // Objeto do erro
+    data: instrutores,
+    isLoading,
+    isError,
+    error 
   } = useQuery({
-    queryKey: ['instrutoresGithub'], // Chave única para o cache
-    queryFn: fetchInstrutores,       // A função que busca os dados
+    queryKey: ['instrutoresGithub'],
+    queryFn: fetchInstrutores, // useQuery vai chamar 'fetchInstrutores' com o objeto { signal }
   });
 
-  // 3. (Feature 3: Gerenciar erros e loading)
   if (isLoading) {
     return <div style={{ textAlign: 'center' }}>Carregando instrutores...</div>;
   }
 
+  // 4. AGORA: Se o timeout estourar, 'isError' será true
   if (isError) {
-    return <div style={{ color: 'red' }}>Erro ao buscar dados: {error.message}</div>;
+    // A 'error.message' será a mensagem do nosso timeout!
+    return <div style={{ color: 'red', textAlign: 'center' }}>{error.message}</div>;
   }
 
-  // 4. Renderização dos dados
+  // ... (O JSX de renderização da lista continua o mesmo)
   return (
     <div>
       <h2>Nossos Instrutores (Membros da Org "ReactJS" no GitHub)</h2>
