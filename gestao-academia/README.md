@@ -1,5 +1,9 @@
 # React + Vite
 ## Feature 1: Implementação com JavaScript moderno e Interface usando React.
+## Feature 2: Gerenciamento de dados, reatividade e manipulação de listas em uma aplicação.
+
+
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
