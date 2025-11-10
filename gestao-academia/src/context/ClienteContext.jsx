@@ -60,7 +60,11 @@ export const ClienteProvider = ({ children }) => {
   };
 
   const handleDelete = async (clienteId) => {
-    if (window.confirm(`Tem certeza que deseja excluir o cliente ID ${clienteId}?`)) {
+    // Tenta encontrar o cliente pelo id para usar o nome na confirmação
+    const cliente = clientes.find(c => c.id === clienteId);
+    const nomeExibicao = cliente ? cliente.nome : `ID ${clienteId}`;
+
+    if (window.confirm(`Tem certeza que deseja excluir o cliente ${nomeExibicao}?`)) {
       try {
         await api.delete(`/clientes/${clienteId}`);
         setClientes(clientes.filter(cliente => cliente.id !== clienteId));
