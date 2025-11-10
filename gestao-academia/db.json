@@ -1,0 +1,22 @@
+{
+  "clientes": [
+    {
+      "id": "1",
+      "nome": "Ana Silva",
+      "plano": "Completo",
+      "status": "Ativo"
+    },
+    {
+      "id": "2",
+      "nome": "Bruno Costa",
+      "plano": "Musculação",
+      "status": "Inativo"
+    },
+    {
+      "id": "3",
+      "nome": "Carla Dias",
+      "plano": "Pilates",
+      "status": "Ativo"
+    }
+  ]
+}
