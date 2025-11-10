@@ -117,3 +117,46 @@ td button.delete-button {
 td button.delete-button:hover {
   background-color: #c0392b;
 }
+
+/* --- Estilos das Mensagens (Renderização Condicional) --- */
+.mensagem {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.mensagem.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.mensagem.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* --- Estilos dos Botões de Ação --- */
+.form-buttons {
+  display: flex;
+  gap: 1rem; /* Espaço entre os botões "Salvar" e "Cancelar" */
+}
+
+/* Botão de Cancelar */
+button.cancel-button {
+  background-color: #95a5a6;
+}
+button.cancel-button:hover {
+  background-color: #7f8c8d;
+}
+
+/* Botão de Editar na Tabela */
+td button.edit-button {
+  background-color: #f39c12;
+}
+td button.edit-button:hover {
+  background-color: #e67e22;
+}

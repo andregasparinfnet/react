@@ -1,78 +1,76 @@
-import React, { useState } from 'react';
+import React from 'react';
+// 2. Importamos nosso novo Hook
+import { useClienteForm } from '../hooks/useClienteForm';
+// 1. Importe o hook de contexto
+import { useClientes } from '../context/ClienteContext';
 
-// 1. Receba 'onSave' via props (usando destructuring)
-const FormularioCliente = ({ onSave }) => {
+// 2. Remova as props onSave, clienteEmEdicao, onCancel
+const FormularioCliente = () => {
 
-  const [nome, setNome] = useState('');
-  const [plano, setPlano] = useState('Musculação');
-  const [status, setStatus] = useState('Ativo'); // 2. Adicione 'status' ao estado
+  // 3. Puxe os dados do contexto
+  const { 
+    handleSave,       // Renomeamos onSave para handleSave no contexto
+    clienteEmEdicao, 
+    handleCancelEdit  // Renomeamos onCancel para handleCancelEdit
+  } = useClientes();
 
-  // (Feature 2: Manipular evento de submissão)
+  // O hook do formulário funciona perfeitamente
+  const { 
+    nome, setNome, 
+    plano, setPlano, 
+    status, setStatus 
+  } = useClienteForm(clienteEmEdicao);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
-    // (Feature 2: Validação simples antes de enviar)
     if (!nome) {
       alert("O nome é obrigatório!");
       return;
     }
-
-    // (Feature 1: Template literals)
-    console.log(`Enviando: ${nome}, ${plano}, ${status}`);
-
-    // 3. Chame a função 'onSave' (que veio do App.jsx) com os dados do estado
-    // (Feature 2: Promises serão tratadas na função pai)
-    if (onSave) {
-      await onSave({ nome, plano, status });
-    }
-
-    // 4. Limpar o formulário após o envio
-    setNome('');
-    setPlano('Musculação');
-    setStatus('Ativo');
+    // 4. Use a função do contexto
+    await handleSave({ nome, plano, status }); 
   };
 
+  // O JSX (return) abaixo usa as funções do contexto
   return (
     <form onSubmit={handleSubmit}>
-      <h3>Cadastrar / Editar Cliente</h3>
-      
+      {/* ... (o h3 não muda) ... */}
+      <h3>
+        {clienteEmEdicao ? `Editando: ${clienteEmEdicao.nome}` : 'Cadastrar Novo Cliente'}
+      </h3>
+      {/* ... (os inputs não mudam) ... */}
+
       <div>
         <label htmlFor="nome">Nome:</label>
-        <input 
-          type="text" 
-          id="nome" 
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-        />
+        <input type="text" id="nome" value={nome} onChange={(e) => setNome(e.target.value)} />
       </div>
-      
       <div>
         <label htmlFor="plano">Plano:</label>
-        <select 
-          id="plano" 
-          value={plano}
-          onChange={(e) => setPlano(e.target.value)}
-        >
+        <select id="plano" value={plano} onChange={(e) => setPlano(e.target.value)}>
           <option value="Musculação">Musculação</option>
           <option value="Pilates">Pilates</option>
           <option value="Completo">Completo</option>
         </select>
       </div>
-
-      {/* 5. Adicione o campo 'status' ao JSX */}
       <div>
         <label htmlFor="status">Status:</label>
-        <select 
-          id="status" 
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
+        <select id="status" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="Ativo">Ativo</option>
           <option value="Inativo">Inativo</option>
         </select>
       </div>
-      
-      <button type="submit">Salvar</button>
+
+      <div className="form-buttons">
+        <button type="submit">
+          {clienteEmEdicao ? 'Atualizar' : 'Salvar'}
+        </button>
+
+        {clienteEmEdicao && (
+          <button type="button" onClick={handleCancelEdit} className="cancel-button">
+            Cancelar
+          </button>
+        )}
+      </div>
     </form>
   );
 };

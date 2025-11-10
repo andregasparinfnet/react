@@ -1,11 +1,13 @@
 import React from 'react';
+// 1. Importe o hook
+import { useClientes } from '../context/ClienteContext';
 
-// (Feature 1: Componente reutilizável)
-// (Feature 1: Usando arrow function para definir o componente)
-// (Feature 1: Usando destructuring nas props para pegar { clientes, onDelete })
-const ClienteTabela = ({ clientes, onDelete }) => {
+// 2. Remova 'onDelete' e 'onEdit' das props
+const ClienteTabela = ({ clientes }) => {
 
-  // (Feature 1: JSX para renderizar os dados)
+  // 3. Puxe as funções do contexto
+  const { handleEdit, handleDelete } = useClientes();
+
   return (
     <table>
       <thead>
@@ -17,19 +19,26 @@ const ClienteTabela = ({ clientes, onDelete }) => {
         </tr>
       </thead>
       <tbody>
-        {/* (Feature 2: Renderização de lista) */}
         {clientes.map(cliente => (
           <tr key={cliente.id}>
             <td>{cliente.nome}</td>
             <td>{cliente.plano}</td>
             <td>{cliente.status}</td>
             <td>
-              {/* (Feature 1: Botões de ação reutilizáveis) */}
-              <button>Editar</button>
+              {/* 4. Use as funções do contexto */}
               <button 
-                onClick={() => onDelete && onDelete(cliente.id)}
+                onClick={() => handleEdit(cliente)} 
+                className="edit-button"
+              >
+                Editar
+              </button>
+
+              <button 
+                onClick={() => handleDelete(cliente.id)}
                 className="delete-button"
-              >Excluir</button>
+              >
+                Excluir
+              </button>
             </td>
           </tr>
         ))}
