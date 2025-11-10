@@ -1,10 +1,10 @@
 {
   "clientes": [
     {
-      "id": "3",
       "nome": "Carla Dias",
       "plano": "Pilates",
-      "status": "Ativo"
+      "status": "Inativo",
+      "id": "3"
     },
     {
       "id": "183a",

@@ -22,19 +22,17 @@ function App() {
   // 4. TODA a lógica de handleSave, handleDelete, etc. SUMIU!
 
   return (
+    // 1. O Título <h1> e o <hr> foram REMOVIDOS daqui
+    // O Layout.jsx agora cuida disso.
     <div>
-      <h1>Gestão de Academia</h1>
-
       <Mensagem tipo={mensagem.tipo} texto={mensagem.texto} />
 
-      <hr />
+      {/* 2. O <hr> foi removido daqui também */}
 
-      {/* 5. Não passamos mais NENHUMA PROP! */}
       <FormularioCliente />
 
-      <hr />
+      <hr /> 
 
-      {/* 6. Não passamos mais NENHUMA PROP! */}
       <ListagemClientes />
     </div>
   )
