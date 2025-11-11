@@ -16,8 +16,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Layout from './components/Layout.jsx';
 import InstrutoresPage from './pages/InstrutoresPage.jsx';
 
-// (Vamos criar esta página simples no próximo passo)
-const HomePage = () => <h2>Bem-vindo ao Sistema!</h2>;
+import HomePage from './pages/HomePage.jsx';
 
 // 2. Crie uma instância do QueryClient
 const queryClient = new QueryClient();
