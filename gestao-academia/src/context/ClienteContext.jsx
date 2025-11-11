@@ -1,134 +1,159 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../services/api'; // Importamos o 'api' aqui
+import React, { createContext, useContext, useState } from 'react';
+// 1. Importe 'useMutation'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import api from '../services/api';
+import { useDebounce } from '../hooks/useDebounce';
 
-// 1. Criamos o Contexto
 const ClienteContext = createContext();
 
-// 2. Criamos o "Provider" (Provedor)
-// É um componente que vai "abraçar" nossa aplicação
 export const ClienteProvider = ({ children }) => {
-
-  // 3. MOVEMOS TODA A LÓGICA DO App.jsx PARA CÁ
-  // ===============================================
-  const [clientes, setClientes] = useState([]);
   const [clienteEmEdicao, setClienteEmEdicao] = useState(null);
   const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
-  // 1. NOVO ESTADO: Para a barra de busca
+  // Toggle usado para sinalizar ao formulário que deve ser limpo após um CREATE
+  const [formResetToggle, setFormResetToggle] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const queryClient = useQueryClient();
 
-  // 2. useEffect MODIFICADO: Agora busca os clientes E reage à busca
-  // (Feature 3: AbortController para tratar race conditions)
-  useEffect(() => {
-    // --- Início da lógica do AbortController ---
-
-    // 1. Cria um novo "controlador" para esta requisição específica
-    const controller = new AbortController();
-
-    const fetchClientes = async () => {
-      try {
-        // 2. Passamos o 'signal' do controlador para o axios.
-        // O 'json-server' usa o parâmetro 'q' para busca full-text
-        const response = await api.get(`/clientes?q=${encodeURIComponent(searchTerm)}`, {
-          signal: controller.signal // <--- O AbortController é conectado aqui
-        });
-
-        setClientes(response.data);
-
-      } catch (error) {
-        // 3. Se o erro for de cancelamento (proposital), não fazemos nada
-        if (error && (error.name === 'CanceledError' || error.code === 'ERR_CANCELED')) {
-          console.log('Requisição anterior cancelada');
-        } else {
-          // Se for um erro real (rede, 500, etc.)
-          console.error("Erro ao buscar clientes:", error);
-          mostrarMensagem('error', 'Falha ao carregar clientes.');
-        }
-      }
-    };
-
-    fetchClientes();
-
-    // 4. A MÁGICA: A função de "limpeza" do useEffect
-    // Isso roda ANTES da próxima execução do useEffect ou quando o componente "morre".
-    return () => {
-      // 5. Cancela a requisição ANTERIOR
-      // console.log(`Cancelando requisição para: ${searchTerm}`);
-      controller.abort(); 
-    };
-    // --- Fim da lógica do AbortController ---
-
-  }, [searchTerm]); // 6. O Array de dependência: Rode de novo se 'searchTerm' mudar
+  // --- BUSCA (useQuery) - Sem alteração ---
+  const { 
+    data: clientes,
+    isFetching: isFetchingClientes,
+    isError: isErrorClientes
+  } = useQuery({
+    queryKey: ['clientes', debouncedSearchTerm], 
+    queryFn: async ({ signal }) => {
+      const response = await api.get(`/clientes?q=${debouncedSearchTerm}`, { signal });
+      return response.data;
+    },
+  });
 
   const mostrarMensagem = (tipo, texto) => {
     setMensagem({ tipo, texto });
-    setTimeout(() => {
-      setMensagem({ tipo: '', texto: '' });
-    }, 3000);
+    setTimeout(() => setMensagem({ tipo: '', texto: '' }), 3000);
   };
 
-  const handleSave = async (dadosCliente) => {
-    try {
+  // --- MUTAÇÕES (useMutation) ---
+
+  // 2. (Feature 3: useMutation para Create/Update)
+  const saveMutation = useMutation({
+    mutationFn: (dadosCliente) => {
       if (clienteEmEdicao) {
-        const response = await api.put(`/clientes/${clienteEmEdicao.id}`, dadosCliente);
-        setClientes(clientes.map(c => (c.id === response.data.id ? response.data : c)));
-        mostrarMensagem('success', 'Cliente atualizado com sucesso!');
+        return api.put(`/clientes/${clienteEmEdicao.id}`, dadosCliente);
       } else {
-        const response = await api.post('/clientes', dadosCliente);
-        setClientes([...clientes, response.data]);
-        mostrarMensagem('success', 'Cliente cadastrado com sucesso!');
+        return api.post('/clientes', dadosCliente);
       }
-      setClienteEmEdicao(null);
-    } catch (error) {
+    },
+    onSuccess: () => {
+      const message = clienteEmEdicao ? 'Cliente atualizado com sucesso!' : 'Cliente cadastrado com sucesso!';
+      mostrarMensagem('success', message);
+      // Se estivermos em modo edição, limpamos o estado de edição.
+      // Se NÃO estivermos em edição (ou seja: criamos um novo cliente),
+      // precisamos também sinalizar ao formulário que limpe os campos.
+      if (clienteEmEdicao) {
+        setClienteEmEdicao(null);
+      } else {
+        // dispara toggle para que hooks que dependem dele resetem o formulário
+        setFormResetToggle(prev => !prev);
+      }
+      queryClient.invalidateQueries({ queryKey: ['clientes'] }); 
+    },
+    onError: () => {
       mostrarMensagem('error', 'Erro ao salvar cliente.');
     }
+  });
+
+  // 3. (Feature 3: useMutation para Delete)
+  const deleteMutation = useMutation({
+    mutationFn: (clienteId) => {
+      return api.delete(`/clientes/${clienteId}`);
+    },
+    onSuccess: () => {
+      mostrarMensagem('success', 'Cliente excluído com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+    },
+    onError: () => {
+      mostrarMensagem('error', 'Erro ao excluir cliente.');
+    }
+  });
+
+  // 4. Nossas funções "handle" agora são mais simples
+  const handleSave = (dadosCliente) => {
+    // Normaliza o nome para comparação (trim + case-insensitive)
+    const nomeNormalized = (dadosCliente.nome || '').trim().toLowerCase();
+
+    if (!nomeNormalized) {
+      mostrarMensagem('error', 'O nome é obrigatório.');
+      return;
+    }
+
+    // Verifica existência de cliente com mesmo nome
+    const existente = (clientes || []).find(c => ((c.nome || '').trim().toLowerCase()) === nomeNormalized);
+
+    if (clienteEmEdicao) {
+      // Se estamos editando, permitir o mesmo nome se for o próprio registro
+      if (existente && existente.id !== clienteEmEdicao.id) {
+        mostrarMensagem('error', 'Já existe um cliente com este nome.');
+        return;
+      }
+    } else {
+      // Modo criação: impede duplicados
+      if (existente) {
+        mostrarMensagem('error', 'Já existe um cliente com este nome.');
+        return;
+      }
+    }
+
+    saveMutation.mutate(dadosCliente);
   };
 
-  const handleEdit = (cliente) => {
-    setClienteEmEdicao(cliente);
-  };
-
-  const handleCancelEdit = () => {
-    setClienteEmEdicao(null);
-  };
-
-  const handleDelete = async (clienteId) => {
-    // Tenta encontrar o cliente pelo id para usar o nome na confirmação
-    const cliente = clientes.find(c => c.id === clienteId);
+  const handleDelete = (clienteId) => {
+    // tenta obter nome para exibir na confirmação
+    const cliente = (clientes || []).find(c => c.id === clienteId);
     const nomeExibicao = cliente ? cliente.nome : `ID ${clienteId}`;
 
     if (window.confirm(`Tem certeza que deseja excluir o cliente ${nomeExibicao}?`)) {
-      try {
-        await api.delete(`/clientes/${clienteId}`);
-        setClientes(clientes.filter(cliente => cliente.id !== clienteId));
-        mostrarMensagem('success', 'Cliente excluído com sucesso!');
-      } catch (error) {
-        mostrarMensagem('error', 'Erro ao excluir cliente.');
-      }
+      deleteMutation.mutate(clienteId);
     }
   };
-  // ===============================================
-  // FIM DA LÓGICA MOVIDA
 
-  // 4. Fornecemos os estados e funções para os "filhos"
+  const handleEdit = (cliente) => setClienteEmEdicao(cliente);
+  const handleCancelEdit = () => setClienteEmEdicao(null);
+
   return (
     <ClienteContext.Provider value={{
-      clientes,
+      // Dados da Busca (useQuery)
+      clientes: clientes || [], 
+      isFetchingClientes,
+      isErrorClientes,
+      
+      // Dados das Mutações (useMutation)
+  isSaving: saveMutation.isLoading,
+  isDeleting: deleteMutation.isLoading,
+  // 'variables' no useMutation guarda o valor que foi passado para .mutate()
+  // Neste caso, é o 'clienteId' que está a ser deletado
+  deletingClientId: deleteMutation.variables,
+      
+      // Estado Local
       clienteEmEdicao,
       mensagem,
       searchTerm,
       setSearchTerm,
+      
+      // Funções "Handler"
       handleSave,
       handleEdit,
       handleCancelEdit,
       handleDelete
+      ,
+      // Toggle que indica para o formulário resetar (muda sempre que um novo cliente é criado)
+      formResetToggle
     }}>
       {children}
     </ClienteContext.Provider>
   );
 };
 
-// 5. Criamos um Hook personalizado para consumir o contexto
-// Isso evita ter que importar 'useContext' e 'ClienteContext' em todo componente
 export const useClientes = () => {
   const context = useContext(ClienteContext);
   if (!context) {

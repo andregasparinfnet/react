@@ -1,22 +1,54 @@
 {
   "clientes": [
     {
-      "id": "183a",
-      "nome": "Maria Axila",
-      "plano": "Pilates",
-      "status": "Ativo"
-    },
-    {
-      "nome": "André Sanches",
+      "nome": "Ana Vieira",
       "plano": "Musculação",
       "status": "Ativo",
-      "id": "42e1"
+      "instrutor": {
+        "login": "aikoven",
+        "avatar_url": "https://avatars.githubusercontent.com/u/857709?v=4"
+      },
+      "id": "f4bb"
     },
     {
-      "id": "0436",
-      "nome": "Paulinha Dindin",
+      "nome": "Paula Timbó",
       "plano": "Pilates",
-      "status": "Ativo"
+      "status": "Ativo",
+      "instrutor": {
+        "login": "aweary",
+        "avatar_url": "https://avatars.githubusercontent.com/u/6886061?v=4"
+      },
+      "id": "9219"
+    },
+    {
+      "nome": "Aninha",
+      "plano": "Musculação",
+      "status": "Ativo",
+      "instrutor": {
+        "login": "alex3165",
+        "avatar_url": "https://avatars.githubusercontent.com/u/4259832?v=4"
+      },
+      "id": "55a8"
+    },
+    {
+      "nome": "Batata",
+      "plano": "Completo",
+      "status": "Ativo",
+      "instrutor": {
+        "login": "acdlite",
+        "avatar_url": "https://avatars.githubusercontent.com/u/3624098?v=4"
+      },
+      "id": "feb4"
+    },
+    {
+      "id": "97b9",
+      "nome": "André",
+      "plano": "Musculação",
+      "status": "Ativo",
+      "instrutor": {
+        "login": "BookOfGreg",
+        "avatar_url": "https://avatars.githubusercontent.com/u/637868?v=4"
+      }
     }
   ]
 }
