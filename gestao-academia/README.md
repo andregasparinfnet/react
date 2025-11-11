@@ -1,6 +1,7 @@
 # React + Vite
 ## Feature 1: Implementação com JavaScript moderno e Interface usando React.
 ## Feature 2: Gerenciamento de dados, reatividade e manipulação de listas em uma aplicação.
+## Feature 3: Integração com APIs externas (API do Github) e navegação em uma aplicação.
 
 
 
