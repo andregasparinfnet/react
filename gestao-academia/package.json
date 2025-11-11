@@ -1,14 +1,14 @@
 {
   "name": "gestao-academia",
   "private": true,
-  "version": "0.0.0-Snapshot",
+  "version": "0.0.0-Snapshot-1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-  "server": "json-server --watch db.json --port $PORT",
+  "server": "cp db.json /tmp/db.json && json-server --watch /tmp/db.json --host 0.0.0.0 --port $PORT --middlewares ./middleware.js",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
