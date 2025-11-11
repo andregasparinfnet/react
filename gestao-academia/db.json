@@ -49,6 +49,16 @@
         "login": "BookOfGreg",
         "avatar_url": "https://avatars.githubusercontent.com/u/637868?v=4"
       }
+    },
+    {
+      "id": "d8b9",
+      "nome": "Aana KAKAKA",
+      "plano": "Musculação",
+      "status": "Ativo",
+      "instrutor": {
+        "login": "alioguzhan",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1928541?v=4"
+      }
     }
   ]
 }
