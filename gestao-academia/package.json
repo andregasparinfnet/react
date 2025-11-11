@@ -1,7 +1,7 @@
 {
   "name": "gestao-academia",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.0-Snapshot",
   "type": "module",
   "scripts": {
     "dev": "vite",
